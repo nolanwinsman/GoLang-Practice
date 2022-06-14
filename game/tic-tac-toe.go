@@ -45,49 +45,41 @@ func printBoard(b Board) {
 func drawShape(spot int, shape string, b Board) Board {
 	switch spot {
 	case 1:
-		fmt.Println("WE AT 1")
 		if b.top.left == "_" {
 			b.top.left = shape
 			return b
 		} 
 	case 2:
-		fmt.Println("2")
 		if b.top.middle == "_" {
 			b.top.middle = shape
 			return b
 		}
 	case 3:
-		fmt.Println("3")
 		if b.top.right == "_" {
 			b.top.right = shape
 			return b
 		}
 	case 4:
-		fmt.Println("4")
 		if b.middle.left == "_" {
 			b.middle.left = shape
 			return b
 		}
 	case 5:
-		fmt.Println("5")
 		if b.middle.middle == "_" {
 			b.middle.middle = shape
 			return b
 		}
 	case 6:
-		fmt.Println("6")
 		if b.middle.right == "_" {
 			b.middle.right = shape
 			return b
 		}
 	case 7:
-		fmt.Println("7")
 		if b.bottom.left == "_" {
 			b.bottom.left = shape
 			return b
 		}
 	case 8:
-		fmt.Println("8")
 		if b.bottom.middle == "_" {
 			b.bottom.middle = shape
 			return b
@@ -99,14 +91,17 @@ func drawShape(spot int, shape string, b Board) Board {
 
 func gameLoop(b Board) {
 	scanner := bufio.NewScanner(os.Stdin)
-	for i := 0; i < 5; i++ {
-		printBoard(b)
+	printBoard(b)
+	someoneWon := false
+	for  !someoneWon{
 		fmt.Println("Pick a number between 1-9: ")
 		scanner.Scan()
 		input, err := strconv.Atoi(scanner.Text())
 		if err == nil && input >= 1 && input <= 9 {
 			b = drawShape(input, "X", b)
-			randomInt := rand.Intn(9)
+			someoneWon = evaluateWin(b, "X") // checks to see if X won the game
+			printBoard(b)
+			randomInt := rand.Intn(9-1) +1
 			fmt.Println("Random Int: ",randomInt)
 			b = drawShape(randomInt, "O", b)
 		}
