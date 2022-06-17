@@ -14,6 +14,9 @@ import (
 	"math/rand"
 )
 
+var SCANNER = bufio.NewScanner(os.Stdin) // global scanner
+var globalBoard = emptyBoard() // global board
+
 type Row struct {
 	left string
 	middle string
@@ -34,82 +37,108 @@ func emptyBoard() Board {
 	return Board{emptyRow(), emptyRow(), emptyRow()}
 }
 
-func printBoard(b Board) {
+func printBoard() {
 	fmt.Printf("\n")
-	fmt.Printf("| %s | %s | %s |\n", b.top.left, b.top.middle, b.top.right)
-	fmt.Printf("| %s | %s | %s |\n", b.middle.left, b.middle.middle, b.middle.right)
-	fmt.Printf("| %s | %s | %s |\n", b.bottom.left, b.bottom.middle, b.bottom.right)
+	fmt.Printf("| %s | %s | %s |\n", globalBoard.top.left, globalBoard.top.middle, globalBoard.top.right)
+	fmt.Printf("| %s | %s | %s |\n", globalBoard.middle.left, globalBoard.middle.middle, globalBoard.middle.right)
+	fmt.Printf("| %s | %s | %s |\n", globalBoard.bottom.left, globalBoard.bottom.middle, globalBoard.bottom.right)
 	fmt.Printf("\n")
 }
 
-func drawShape(spot int, shape string, b Board) Board {
+func drawShape(spot int, shape string) bool{
 	switch spot {
 	case 1:
-		if b.top.left == "_" {
-			b.top.left = shape
-			return b
+		if globalBoard.top.left == "_" {
+			globalBoard.top.left = shape
+			return true
 		} 
 	case 2:
-		if b.top.middle == "_" {
-			b.top.middle = shape
-			return b
+		if globalBoard.top.middle == "_" {
+			globalBoard.top.middle = shape
+			return true
 		}
 	case 3:
-		if b.top.right == "_" {
-			b.top.right = shape
-			return b
+		if globalBoard.top.right == "_" {
+			globalBoard.top.right = shape
+			return true
 		}
 	case 4:
-		if b.middle.left == "_" {
-			b.middle.left = shape
-			return b
+		if globalBoard.middle.left == "_" {
+			globalBoard.middle.left = shape
+			return true
 		}
 	case 5:
-		if b.middle.middle == "_" {
-			b.middle.middle = shape
-			return b
+		if globalBoard.middle.middle == "_" {
+			globalBoard.middle.middle = shape
+			return true
 		}
 	case 6:
-		if b.middle.right == "_" {
-			b.middle.right = shape
-			return b
+		if globalBoard.middle.right == "_" {
+			globalBoard.middle.right = shape
+			return true
 		}
 	case 7:
-		if b.bottom.left == "_" {
-			b.bottom.left = shape
-			return b
+		if globalBoard.bottom.left == "_" {
+			globalBoard.bottom.left = shape
+			return true
 		}
 	case 8:
-		if b.bottom.middle == "_" {
-			b.bottom.middle = shape
-			return b
+		if globalBoard.bottom.middle == "_" {
+			globalBoard.bottom.middle = shape
+			return true 
+		}
+	case 9:
+		if globalBoard.bottom.right == "_" {
+			globalBoard.bottom.right = shape
+			return true
 		}
 	}
-	fmt.Println("Invalid input")
-	return b
+	return false
 }
 
-func gameLoop(b Board) {
-	scanner := bufio.NewScanner(os.Stdin)
-	printBoard(b)
-	someoneWon := false
-	for  !someoneWon{
-		fmt.Println("Pick a number between 1-9: ")
-		scanner.Scan()
-		input, err := strconv.Atoi(scanner.Text())
-		if err == nil && input >= 1 && input <= 9 {
-			b = drawShape(input, "X", b)
-			someoneWon = evaluateWin(b, "X") // checks to see if X won the game
-			printBoard(b)
-			randomInt := rand.Intn(9-1) +1
-			fmt.Println("Random Int: ",randomInt)
-			b = drawShape(randomInt, "O", b)
+func playerTurn(shape string) {
+	fmt.Printf("Player Turn\nPick a number between 1-9: ")
+	SCANNER.Scan()
+	input, err := strconv.Atoi(SCANNER.Text()) // gets input from the user and converts it to an int
+	if err == nil && input >= 1 && input <= 9 {
+		result := drawShape(input, shape)
+		if !result {
+			fmt.Println("Invalid Input, try again")
+			playerTurn(shape)
+			return
 		}
-	} 
+	}
+}
+func opponentTurn(shape string) {
+	randomInt := rand.Intn(9-1) +1 // a random integer from 1-9
+	result := drawShape(randomInt, shape)
+	if !result {
+		opponentTurn(shape)
+	}
+}
+
+func evaluateWin(c string) bool {
+	return false
+}
+
+func gameLoop() {
+	printBoard()
+	// someoneWon := false
+	for  i:=1; i <= 9; i++ {
+		if i % 2 != 0 {
+			playerTurn("X")
+			// someoneWon = evaluateWin(b, "X") // checks to see if X won the game
+			printBoard()
+		} else {
+			opponentTurn("O")
+			// someoneWon = evaluateWin(b, "X") // checks to see if X won the game
+			fmt.Println("Opponent Turn")
+			printBoard()
+		}
+	}
 }
 
 func main() {
 	fmt.Printf("Tic-Tac-Toe Game\n")
-	gameBoard := emptyBoard()
-	gameLoop(gameBoard)
+	gameLoop()
 }
